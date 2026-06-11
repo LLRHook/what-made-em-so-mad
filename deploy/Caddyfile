@@ -1,0 +1,16 @@
+# Installed by deploy/install_remote.sh.
+# For TLS, set WMESM_DOMAIN before running the installer. Caddy will then use
+# the domain as the site address and provision HTTPS automatically.
+:80 {
+    root * /opt/wmesm/frontend/dist
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}

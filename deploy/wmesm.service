@@ -1,0 +1,17 @@
+[Unit]
+Description=What Made 'Em So Mad API
+After=network.target
+
+[Service]
+Type=simple
+User=wmesm
+Group=wmesm
+WorkingDirectory=/opt/wmesm/backend
+Environment=WMESM_DATA_DIR=/var/lib/wmesm/data
+Environment=WMESM_MODELS_DIR=/var/lib/wmesm/models
+ExecStart=/opt/wmesm/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,215 @@
+{
+  "name": "default_local_accuracy_fixtures",
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "streamer_always_visible",
+      "category": "streamer always visible",
+      "duration_seconds": 60.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 60.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 30.0},
+          {"label": "talking", "start_seconds": 30.0, "end_seconds": 50.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 60.0, "confidence": 0.92}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 28.0, "confidence": 0.78},
+          {"label": "talking", "start_seconds": 31.0, "end_seconds": 49.0, "confidence": 0.81}
+        ]
+      }
+    },
+    {
+      "id": "streamer_leaves_and_returns",
+      "category": "streamer leaves and returns",
+      "duration_seconds": 90.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 20.0},
+          {"state": "absent", "start_seconds": 20.0, "end_seconds": 55.0},
+          {"state": "returned", "start_seconds": 55.0, "end_seconds": 62.0},
+          {"state": "present", "start_seconds": 62.0, "end_seconds": 90.0}
+        ],
+        "activity_events": [
+          {"label": "returned", "start_seconds": 55.0, "end_seconds": 62.0},
+          {"label": "talking", "start_seconds": 64.0, "end_seconds": 84.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 22.0, "confidence": 0.88},
+          {"state": "absent", "start_seconds": 22.0, "end_seconds": 57.0, "confidence": 0.73},
+          {"state": "returned", "start_seconds": 57.0, "end_seconds": 63.0, "confidence": 0.7},
+          {"state": "present", "start_seconds": 63.0, "end_seconds": 90.0, "confidence": 0.83}
+        ],
+        "activity_events": [
+          {"label": "returned", "start_seconds": 57.0, "end_seconds": 63.0, "confidence": 0.68},
+          {"label": "talking", "start_seconds": 64.0, "end_seconds": 82.0, "confidence": 0.76}
+        ]
+      }
+    },
+    {
+      "id": "facecam_partially_occluded",
+      "category": "facecam partially occluded",
+      "duration_seconds": 70.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 70.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 25.0},
+          {"label": "talking", "start_seconds": 25.0, "end_seconds": 45.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 70.0, "confidence": 0.74}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 24.0, "confidence": 0.65},
+          {"label": "talking", "start_seconds": 27.0, "end_seconds": 46.0, "confidence": 0.67}
+        ]
+      }
+    },
+    {
+      "id": "facecam_disappears_or_layout_changes",
+      "category": "facecam disappears or layout changes",
+      "duration_seconds": 80.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 35.0},
+          {"state": "absent", "start_seconds": 35.0, "end_seconds": 58.0},
+          {"state": "present", "start_seconds": 58.0, "end_seconds": 80.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 35.0},
+          {"label": "talking", "start_seconds": 60.0, "end_seconds": 74.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 34.0, "confidence": 0.82},
+          {"state": "absent", "start_seconds": 34.0, "end_seconds": 60.0, "confidence": 0.71},
+          {"state": "present", "start_seconds": 60.0, "end_seconds": 80.0, "confidence": 0.78}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 33.0, "confidence": 0.64},
+          {"label": "talking", "start_seconds": 61.0, "end_seconds": 75.0, "confidence": 0.69}
+        ]
+      }
+    },
+    {
+      "id": "loud_game_audio_streamer_silent",
+      "category": "loud game audio while streamer is silent",
+      "duration_seconds": 50.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 50.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 50.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 50.0, "confidence": 0.86}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 45.0, "confidence": 0.55},
+          {"label": "yelling/frustrated", "start_seconds": 45.0, "end_seconds": 50.0, "confidence": 0.42}
+        ]
+      }
+    },
+    {
+      "id": "guest_or_ingame_speech",
+      "category": "guest/in-game speech while streamer is visible",
+      "duration_seconds": 65.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 65.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 65.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 65.0, "confidence": 0.84}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 60.0, "confidence": 0.57},
+          {"label": "talking", "start_seconds": 20.0, "end_seconds": 30.0, "confidence": 0.44}
+        ]
+      }
+    },
+    {
+      "id": "clear_laughter",
+      "category": "clear laughter",
+      "duration_seconds": 40.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 40.0}
+        ],
+        "activity_events": [
+          {"label": "laughing", "start_seconds": 12.0, "end_seconds": 20.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 40.0, "confidence": 0.9}
+        ],
+        "activity_events": [
+          {"label": "laughing", "start_seconds": 12.0, "end_seconds": 19.0, "confidence": 0.86}
+        ]
+      }
+    },
+    {
+      "id": "clear_yelling_frustrated",
+      "category": "clear yelling/frustrated speech",
+      "duration_seconds": 45.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 45.0}
+        ],
+        "activity_events": [
+          {"label": "yelling/frustrated", "start_seconds": 18.0, "end_seconds": 30.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 45.0, "confidence": 0.91}
+        ],
+        "activity_events": [
+          {"label": "yelling/frustrated", "start_seconds": 17.0, "end_seconds": 29.0, "confidence": 0.82}
+        ]
+      }
+    },
+    {
+      "id": "quiet_focused_gameplay",
+      "category": "quiet focused gameplay",
+      "duration_seconds": 55.0,
+      "ground_truth": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 55.0}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 55.0}
+        ]
+      },
+      "predictions": {
+        "lifecycle_segments": [
+          {"state": "present", "start_seconds": 0.0, "end_seconds": 55.0, "confidence": 0.89}
+        ],
+        "activity_events": [
+          {"label": "focused", "start_seconds": 0.0, "end_seconds": 55.0, "confidence": 0.74}
+        ]
+      }
+    }
+  ]
+}

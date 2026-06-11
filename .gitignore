@@ -1,0 +1,42 @@
+# Local data and model artifacts (never committed)
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Build & coverage
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+*.cover
+
+# SQLite working files
+*.sqlite
+*.sqlite-journal
+*.db-journal
