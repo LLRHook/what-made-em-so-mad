@@ -505,6 +505,21 @@ VAD / fusion services), `worker` (queued-job runner), `frontend` (React app),
   build/install validation remains pending. Docs: docs/setup.md, VERIFICATION.md.
 - **Status:** in-progress
 
+### [BUG-032] Installed-wheel smoke rejects macOS temporary-directory aliases
+- [ ] **Severity:** med
+- **Area:** tests, tooling
+- **File(s):** backend/scripts/check_native_distribution.py
+- **Observation:** The macOS hosted package smoke compares the loader's resolved
+  native path with an unresolved temporary install root under /var; /private/var
+  aliases make the source-shadowing assertion fail after a successful build.
+- **Expected:** Compare canonical paths while still verifying the loaded library
+  belongs to the installed wheel rather than the source tree.
+- **Repro / Notes:** A synthetic symlink-root check fails before normalization
+  and passes with Path.resolve(); hosted final package rerun remains pending.
+- **Fix:** Resolve isolated smoke arguments before adding the install root to
+  sys.path or checking library ownership. No product matcher or loader change.
+- **Status:** in-progress
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

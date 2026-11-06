@@ -15,7 +15,7 @@ sys.path.insert(0, str(BACKEND))
 SMOKE = r'''
 import json, os, sys
 from pathlib import Path
-installed, data, golden = map(Path, sys.argv[1:])
+installed, data, golden = (Path(argument).resolve() for argument in sys.argv[1:])
 sys.path.insert(0, str(installed))
 os.environ['PATH'] = ''
 import app
