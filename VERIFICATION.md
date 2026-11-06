@@ -117,9 +117,11 @@ ticking.
   ```powershell
   cd backend; .venv\Scripts\python.exe -m pytest
   ```
-  Expected: **80 passed** across **13 test files** (baseline 2026-06-11:
+  Expected: **140 passed** across **15 test files** (80 original cases plus
+  60 native parity/error, evaluation API, packaging and claim-regression cases for FEAT-020 / BUG-031).
+  Original baseline 2026-06-11:
   analysis, capabilities, clips, database, evaluation, ffmpeg, ffprobe,
-  hashing, migrations, system, thumbnails, videos, videos_project_list).
+  hashing, migrations, system, thumbnails, videos, videos_project_list.
   Enumerate with `.venv\Scripts\python.exe -m pytest --collect-only -q`.
 - [ ] 2.2 Frontend unit/component tests:
   ```powershell
@@ -136,8 +138,23 @@ ticking.
   ~191 kB JS bundle).
 - [ ] 2.4 Browser-level E2E: **no framework wired** — placeholder pending
   FEAT-006. Until then, § 3.4's manual UI walkthrough is the only UI gate.
+- [ ] 2.5 Evaluation native core (from `backend/`, after source/editable install):
+  ```sh
+  cargo test --manifest-path native/intervals/Cargo.toml --locked --offline
+  cargo clippy --manifest-path native/intervals/Cargo.toml --locked --offline --all-targets -- -D warnings
+  cargo fmt --manifest-path native/intervals/Cargo.toml -- --check
+  ```
+  Expected: **4 native unit tests**, no ignored tests, and clean Clippy/format
+  checks. Python tests exercise the installed native artifact, compare all nine
+  packaged scenarios to the frozen Python oracle, and verify typed missing-library
+  errors without partial SQLite evaluation rows. Build a platform wheel with
+  `python -m pip wheel --no-deps .`, install it in a fresh environment, and rerun
+  the packaged evaluation API test there. Source/editable builds require Rust;
+  wheel installs should run evaluation without Cargo on PATH.
+  On macOS, verify the wheel's architecture tag agrees with `lipo -archs` on its
+  native payload: a thin arm64 or x86_64 library must not advertise universal2.
 
-Total baseline: **backend 80 tests / 13 files; frontend 29 tests / 6 files.**
+Current suite: **backend 140 tests / 15 files + 4 Rust tests; frontend 29 tests / 6 files.**
 
 ## Stage 3 — Functional E2E walkthrough
 

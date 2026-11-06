@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools==84.2.1", "wheel==0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,6 +24,8 @@ dependencies = [
 dev = [
     "pytest>=8,<9",
     "pytest-asyncio>=0.23,<1.0",
+    "setuptools==84.2.1",  # Build-adapter tests exercise the wheel/editable hook.
+    "wheel==0.48.0",  # Wheel-file and macOS payload-tag helpers used by the hook.
 ]
 
 [tool.setuptools.packages.find]

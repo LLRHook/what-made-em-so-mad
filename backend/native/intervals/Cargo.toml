@@ -1,0 +1,14 @@
+[package]
+name = "wmesm-intervals"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "wmesm_intervals"
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+strip = "debuginfo"

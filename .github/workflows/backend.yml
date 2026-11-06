@@ -1,0 +1,40 @@
+name: Backend native integration
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.12', '3.13']
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      RUSTUP_AUTO_INSTALL: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install backend and existing development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Check native formatting
+        run: cargo fmt --manifest-path native/intervals/Cargo.toml -- --check
+      - name: Test native interval matching
+        run: cargo test --manifest-path native/intervals/Cargo.toml --locked --offline
+      - name: Check native code
+        run: cargo clippy --manifest-path native/intervals/Cargo.toml --locked --offline --all-targets -- -D warnings
+      - name: Test actual host-native parity, API errors, and isolated SQLite behavior
+        run: python -m pytest
+      - name: Test wheel tags, native payload, source distribution, and installed API
+        run: python scripts/check_native_distribution.py

@@ -30,6 +30,10 @@ Thumbs.db
 *.swp
 
 # Build & coverage
+build/
+target/
+backend/app/_native/_intervals*.so
+backend/app/_native/_intervals*.pyd
 coverage/
 htmlcov/
 .coverage

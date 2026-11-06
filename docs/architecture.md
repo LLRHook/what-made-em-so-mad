@@ -26,6 +26,36 @@ The worker path is intentionally small: it atomically claims the oldest queued a
 
 The data shapes are small, mostly JSON-in-text columns, and the queries are simple. The stdlib `sqlite3` driver with `Row` factory plus `PRAGMA foreign_keys=ON` is enough. Adding SQLAlchemy now would be premature.
 
+## Evaluation interval matching
+
+`POST /api/evaluation/run` calls `services/evaluation.py`, which loads either
+fixture predictions or an existing timeline, normalizes intervals, and sorts
+predictions stably by confidence. `_match_segments` delegates each whole interval
+set to `services/interval_matching.py`. That adapter calls the Rust
+`native/intervals` cdylib through ctypes in the API process. No process is spawned
+for a segment, frame, or evaluation request.
+
+Rust computes interval IoU and greedy one-to-one matching, retaining strict-best
+tie selection, inclusive thresholds, and the existing non-finite comparison
+behavior. Python owns labels, normalization, confidence ordering, boundary error
+arithmetic, top-five selection, rounding, aggregation and final SQLite persistence.
+This is a processor port, not a new accuracy model or a measured speed claim.
+
+The C ABI uses Python-owned `double` interval arrays and `size_t` match-index
+arrays; Rust retains no pointers. An ABI version check precedes calls, and native
+buffer-shape/panic errors and invalid output indices fail explicitly. Setuptools
+builds the dependency-free crate in normal source/editable/wheel builds. The loader
+uses the package's absolute path and this interpreter's extension suffix, never
+PATH or a fallback glob. Missing/incompatible artifacts produce a typed 503 only
+when needed; boot and optional media/model capability gating remain independent.
+Native execution errors produce a typed 500. Scoring finishes before the existing
+evaluation INSERT, so a failed call persists no partial run.
+
+Analysis job transitions and the worker's SQLite compare-and-swap claim are outside
+this boundary. Regression coverage races two claimants against metadata-only
+temporary SQLite rows. The frozen pre-native evaluator in `tests/reference/`
+supplies independent matching and complete metric parity checks.
+
 ## Worker model
 
 The heaviest implemented operation is still an external process (`yt-dlp`, `ffmpeg`, or OpenCV sampling). Analysis can now be queued, run in a FastAPI background task, or claimed by `scripts/run_worker.py`. The worker persists queued jobs in SQLite, but a job that is already marked `running` still needs stale-job recovery if the worker process crashes. Worker hardening should happen before generated transcription, SAM-style tracking, or long batch analysis becomes default.

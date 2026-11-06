@@ -489,6 +489,37 @@ VAD / fusion services), `worker` (queued-job runner), `frontend` (React app),
 
 ---
 
+### [BUG-031] Single-architecture native wheels advertise universal2 compatibility
+- [ ] **Severity:** high
+- **Area:** tooling
+- **File(s):** backend/setup.py, backend/tests/test_native_build.py
+- **Observation:** A universal2 CPython build tags a wheel as universal2 even though
+  the Rust interval matcher is built for only the active host architecture.
+- **Expected:** Wheel tags advertise only the compiled host architecture and the
+  minimum macOS version required by its payload; editable metadata is consistent.
+- **Repro / Notes:** Compare bdist_wheel.get_tag() with lipo -archs on the interval
+  library. A thin arm64 binary must not advertise x86_64 compatibility.
+- **Fix:** Restrict macOS wheel and editable tags to the active Rust host slice,
+  retain payload minimum-OS detection, and enforce the arm64 macOS 11 floor.
+  Seven tag regressions and real retained-payload metadata pass; final wheel
+  build/install validation remains pending. Docs: docs/setup.md, VERIFICATION.md.
+- **Status:** in-progress
+
+### [BUG-032] Installed-wheel smoke rejects macOS temporary-directory aliases
+- [ ] **Severity:** med
+- **Area:** tests, tooling
+- **File(s):** backend/scripts/check_native_distribution.py
+- **Observation:** The macOS hosted package smoke compares the loader's resolved
+  native path with an unresolved temporary install root under /var; /private/var
+  aliases make the source-shadowing assertion fail after a successful build.
+- **Expected:** Compare canonical paths while still verifying the loaded library
+  belongs to the installed wheel rather than the source tree.
+- **Repro / Notes:** A synthetic symlink-root check fails before normalization
+  and passes with Path.resolve(); hosted final package rerun remains pending.
+- **Fix:** Resolve isolated smoke arguments before adding the install root to
+  sys.path or checking library ownership. No product matcher or loader change.
+- **Status:** in-progress
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

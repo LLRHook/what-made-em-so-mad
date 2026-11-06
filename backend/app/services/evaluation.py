@@ -11,6 +11,7 @@ from app.core.errors import NotFoundError, ValidationFailedError
 from app.db.database import connection
 from app.domain.models import EvaluationRunResponse
 from app.services.analysis import get_timeline, latest_timeline_for_video
+from app.services.interval_matching import match_indices
 
 
 def run_evaluation(fixture_set_path: str | None = None) -> EvaluationRunResponse:
@@ -170,32 +171,18 @@ def _match_segments(
     *,
     min_iou: float = 0.5,
 ) -> tuple[list[tuple[dict[str, Any], dict[str, Any]]], list[float]]:
-    available = set(range(len(truth)))
+    # Python owns stable confidence sorting (including its existing NaN behavior),
+    # object identity, boundary arithmetic and rounding. Rust performs the greedy
+    # matching loop over the entire interval set in one call.
+    ordered = sorted(pred, key=lambda item: item.get("confidence", 0.0), reverse=True)
     matches: list[tuple[dict[str, Any], dict[str, Any]]] = []
     errors: list[float] = []
-    for prediction in sorted(pred, key=lambda item: item.get("confidence", 0.0), reverse=True):
-        best_index = None
-        best_iou = 0.0
-        for index in available:
-            score = _iou_seconds(truth[index], prediction)
-            if score > best_iou:
-                best_iou = score
-                best_index = index
-        if best_index is not None and best_iou >= min_iou:
-            actual = truth[best_index]
-            available.remove(best_index)
-            matches.append((actual, prediction))
-            errors.append(abs(actual["start_seconds"] - prediction["start_seconds"]))
-            errors.append(abs(actual["end_seconds"] - prediction["end_seconds"]))
+    for actual_index, prediction_index in match_indices(truth, ordered, min_iou=min_iou):
+        actual, prediction = truth[actual_index], ordered[prediction_index]
+        matches.append((actual, prediction))
+        errors.append(abs(actual["start_seconds"] - prediction["start_seconds"]))
+        errors.append(abs(actual["end_seconds"] - prediction["end_seconds"]))
     return matches, errors
-
-
-def _iou_seconds(a: dict[str, Any], b: dict[str, Any]) -> float:
-    overlap = max(0.0, min(a["end_seconds"], b["end_seconds"]) - max(a["start_seconds"], b["start_seconds"]))
-    union = max(a["end_seconds"], b["end_seconds"]) - min(a["start_seconds"], b["start_seconds"])
-    if union <= 0:
-        return 0.0
-    return overlap / union
 
 
 def _precision_at_top_k(truth: list[dict[str, Any]], pred: list[dict[str, Any]], *, label: str, k: int) -> float | None:

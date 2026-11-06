@@ -65,6 +65,24 @@ class ValidationFailedError(AppError):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, message=message)
 
 
+class EvaluationNativeUnavailableError(AppError):
+    error_code = "evaluation_native_unavailable"
+
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            message="The evaluation interval matcher is missing or incompatible with this Python/platform.",
+            setup_hint="Reinstall the backend for this Python/platform; source installs require Rust and Cargo. See docs/setup.md.",
+        )
+
+
+class EvaluationNativeError(AppError):
+    error_code = "evaluation_native_failed"
+
+    def __init__(self) -> None:
+        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message="The evaluation interval matcher failed.")
+
+
 class FFmpegExecutionError(AppError):
     error_code = "ffmpeg_failed"
 
