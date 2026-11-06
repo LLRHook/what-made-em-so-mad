@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 import setuptools
 from setuptools import Distribution, Extension
+from setuptools.command.bdist_wheel import bdist_wheel
 from setuptools.errors import CompileError
 
 
@@ -88,3 +89,39 @@ def test_build_failures_are_explicit(build_adapter, monkeypatch, problem):
     monkeypatch.setattr(namespace["subprocess"], "run", compiler)
     with pytest.raises(CompileError):
         command.build_extension(extension)
+
+
+@pytest.fixture
+def wheel_adapter(monkeypatch):
+    configuration = {}
+    monkeypatch.setattr(setuptools, "setup", lambda **kwargs: configuration.update(kwargs))
+    namespace = runpy.run_path(str(Path(__file__).resolve().parents[1] / "setup.py"))
+    command_type = configuration["cmdclass"].get("bdist_wheel", bdist_wheel)
+    return command_type(Distribution()), namespace
+
+
+@pytest.mark.parametrize("system,machine,default_tag,expected_tag", [
+    ("darwin", "arm64", "macosx_11_0_universal2", "macosx_11_0_arm64"),
+    ("darwin", "x86_64", "macosx_10_13_universal2", "macosx_10_13_x86_64"),
+    ("darwin", "arm64", "macosx_10_13_universal2", "macosx_11_0_arm64"),
+    ("darwin", "arm64", "macosx_12_0_x86_64", "macosx_12_0_arm64"),
+    ("linux", "x86_64", "linux_x86_64", "linux_x86_64"),
+    ("win32", "AMD64", "win_amd64", "win_amd64"),
+])
+def test_wheel_tag_advertises_only_the_compiled_host_architecture(
+    wheel_adapter, monkeypatch, system, machine, default_tag, expected_tag,
+):
+    command, namespace = wheel_adapter
+    monkeypatch.setattr(bdist_wheel, "get_tag", lambda _: ("cp313", "cp313", default_tag))
+    monkeypatch.setattr(namespace["sys"], "platform", system)
+    monkeypatch.setattr(namespace["platform"], "machine", lambda: machine)
+    assert command.get_tag() == ("cp313", "cp313", expected_tag)
+
+
+def test_wheel_tag_rejects_an_unknown_macos_architecture(wheel_adapter, monkeypatch):
+    command, namespace = wheel_adapter
+    monkeypatch.setattr(bdist_wheel, "get_tag", lambda _: ("cp313", "cp313", "macosx_11_0_universal2"))
+    monkeypatch.setattr(namespace["sys"], "platform", "darwin")
+    monkeypatch.setattr(namespace["platform"], "machine", lambda: "unknown")
+    with pytest.raises(CompileError, match="architecture"):
+        command.get_tag()

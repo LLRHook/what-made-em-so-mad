@@ -489,6 +489,22 @@ VAD / fusion services), `worker` (queued-job runner), `frontend` (React app),
 
 ---
 
+### [BUG-031] Single-architecture native wheels advertise universal2 compatibility
+- [ ] **Severity:** high
+- **Area:** tooling
+- **File(s):** backend/setup.py, backend/tests/test_native_build.py
+- **Observation:** A universal2 CPython build tags a wheel as universal2 even though
+  the Rust interval matcher is built for only the active host architecture.
+- **Expected:** Wheel tags advertise only the compiled host architecture and the
+  minimum macOS version required by its payload; editable metadata is consistent.
+- **Repro / Notes:** Compare bdist_wheel.get_tag() with lipo -archs on the interval
+  library. A thin arm64 binary must not advertise x86_64 compatibility.
+- **Fix:** Restrict macOS wheel and editable tags to the active Rust host slice,
+  retain payload minimum-OS detection, and enforce the arm64 macOS 11 floor.
+  Seven tag regressions and real retained-payload metadata pass; final wheel
+  build/install validation remains pending. Docs: docs/setup.md, VERIFICATION.md.
+- **Status:** in-progress
+
 ## Migrated to changelog
 
 Entries below have been ticked off and copied as a one-liner into `CHANGELOG.md`.

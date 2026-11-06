@@ -39,6 +39,8 @@ runs during an API request or application boot. Reinstall after Rust edits.
 
 The build runs on the target Python/platform and produces a platform-tagged wheel;
 cross-compilation is rejected. Keep the library with its installed backend package.
+macOS wheel and editable-install tags name the active host architecture, including
+when Python itself is universal2; the matcher contains only that host slice.
 Do not copy it between Python versions, operating systems or architectures.
 Windows source builds also need the linker for the installed Rust toolchain.
 

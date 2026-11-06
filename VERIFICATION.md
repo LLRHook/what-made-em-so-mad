@@ -117,8 +117,8 @@ ticking.
   ```powershell
   cd backend; .venv\Scripts\python.exe -m pytest
   ```
-  Expected: **133 passed** across **15 test files** (80 original cases plus
-  53 native parity/error, evaluation API, packaging and claim-regression cases for FEAT-020).
+  Expected: **140 passed** across **15 test files** (80 original cases plus
+  60 native parity/error, evaluation API, packaging and claim-regression cases for FEAT-020 / BUG-031).
   Original baseline 2026-06-11:
   analysis, capabilities, clips, database, evaluation, ffmpeg, ffprobe,
   hashing, migrations, system, thumbnails, videos, videos_project_list.
@@ -151,8 +151,10 @@ ticking.
   `python -m pip wheel --no-deps .`, install it in a fresh environment, and rerun
   the packaged evaluation API test there. Source/editable builds require Rust;
   wheel installs should run evaluation without Cargo on PATH.
+  On macOS, verify the wheel's architecture tag agrees with `lipo -archs` on its
+  native payload: a thin arm64 or x86_64 library must not advertise universal2.
 
-Current suite: **backend 133 tests / 15 files + 4 Rust tests; frontend 29 tests / 6 files.**
+Current suite: **backend 140 tests / 15 files + 4 Rust tests; frontend 29 tests / 6 files.**
 
 ## Stage 3 — Functional E2E walkthrough
 

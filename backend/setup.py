@@ -10,6 +10,7 @@ import sys
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
+from setuptools.command.bdist_wheel import bdist_wheel
 from setuptools.errors import CompileError
 
 
@@ -59,7 +60,25 @@ class RustBuildExt(build_ext):
         shutil.copy2(artifacts[0], destination)
 
 
+class RustBdistWheel(bdist_wheel):
+    def get_tag(self):
+        implementation, abi, tag = super().get_tag()
+        if sys.platform == "darwin":
+            # A universal2 interpreter still builds only one rustc host slice.
+            # Retain the payload's minimum OS version computed by setuptools,
+            # but never advertise another architecture in wheel/editable tags.
+            machine = platform.machine().lower()
+            if machine not in ("arm64", "x86_64") or not tag.startswith("macosx_"):
+                raise CompileError("Unsupported macOS wheel platform/architecture.")
+            _, major, minor, _ = tag.split("_", 3)
+            version = (int(major), int(minor))
+            if machine == "arm64":
+                version = max(version, (11, 0))
+            tag = f"macosx_{version[0]}_{version[1]}_{machine}"
+        return implementation, abi, tag
+
+
 setup(
     ext_modules=[Extension("app._native._intervals", sources=["native/intervals/src/lib.rs"])],
-    cmdclass={"build_ext": RustBuildExt},
+    cmdclass={"build_ext": RustBuildExt, "bdist_wheel": RustBdistWheel},
 )
