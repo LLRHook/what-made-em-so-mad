@@ -3,6 +3,8 @@
 ## Required
 
 - **Python 3.12** — backend runtime.
+- **Rust 1.85+ and Cargo** on PATH for backend source/editable installs. A backend
+  wheel built for the target Python/platform already contains the native library.
 - **Node LTS** (≥ 18; 20+ recommended) — frontend tooling.
 
 ## Recommended
@@ -29,6 +31,24 @@ pip install -e .[dev]
 pytest -q
 uvicorn app.main:app --reload --port 8000
 ```
+
+The setuptools build automatically compiles the offline evaluation interval
+matcher using `cargo build --release --locked --offline`. It has no third-party
+Cargo dependencies. Cargo's normal `CARGO_TARGET_DIR` setting is honored; no build
+runs during an API request or application boot. Reinstall after Rust edits.
+
+The build runs on the target Python/platform and produces a platform-tagged wheel;
+cross-compilation is rejected. Keep the library with its installed backend package.
+Do not copy it between Python versions, operating systems or architectures.
+Windows source builds also need the linker for the installed Rust toolchain.
+
+An absent, incompatible, or wrong-ABI library produces HTTP 503
+`evaluation_native_unavailable` with a setup hint when evaluation needs interval
+matching. Reinstall the backend with the intended interpreter and architecture.
+A native execution/protocol failure produces HTTP 500 `evaluation_native_failed`.
+Neither error writes an evaluation run. Health, analysis, and optional media/model
+capability probes remain usable without the evaluation library. Empty segment
+comparisons do not need a native call.
 
 ## Local frontend setup
 

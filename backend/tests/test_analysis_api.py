@@ -155,6 +155,32 @@ def test_worker_runs_oldest_queued_analysis_job(client, analysis_video) -> None:
     assert remaining.json()["status"] == "queued"
 
 
+def test_worker_claim_is_single_winner_without_native_or_media(isolated_settings, monkeypatch, tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from app.db.database import connection
+    from app.services.analysis import claim_next_analysis_job, queue_auto_analysis
+    from app.services import interval_matching as native
+    from tests.reference.synthetic_timeline import seed_timeline
+
+    seed_timeline()
+    queued = queue_auto_analysis("synthetic-video", force=True)
+    monkeypatch.setattr(native, "_library_path", lambda: tmp_path / "missing-native.so")
+    barrier = Barrier(2)
+
+    def claim():
+        barrier.wait(timeout=5)
+        return claim_next_analysis_job()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: claim(), range(2)))
+    assert [job.id for job in results if job is not None] == [queued.id]
+    assert results.count(None) == 1
+    with connection() as conn:
+        assert conn.execute("SELECT status FROM analysis_jobs WHERE id=?", (queued.id,)).fetchone()[0] == "running"
+        assert conn.execute("SELECT COUNT(*) FROM activity_events").fetchone()[0] == 1
+
+
 def test_identity_embedding_similarity_respects_provider_kind() -> None:
     assert _embedding_similarity(
         {"kind": "opencv_sface", "embedding": [1.0, 0.0]},

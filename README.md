@@ -53,6 +53,7 @@ Still planned or model-dependent (tracked in [features.md](features.md)):
 | Layer | Technology |
 |---|---|
 | Backend API | Python 3.12, FastAPI, uvicorn, Pydantic v2 |
+| Evaluation interval matching | Rust cdylib, called in-process through Python ctypes |
 | Persistence | SQLite (schema in `backend/app/db/schema.sql`) |
 | Analysis | OpenCV (headless), optional faster-whisper / SFace / YuNet assets |
 | Media tooling | ffmpeg + ffprobe (subprocess), optional yt-dlp |
@@ -76,6 +77,7 @@ models/    model checkpoints (gitignored)
 ## Prerequisites
 
 - Python 3.12+
+- Rust 1.85+ and Cargo for backend source/editable installs; platform wheels include the evaluation library.
 - Node LTS (v20+) and npm
 - `ffmpeg` + `ffprobe` on PATH — optional for boot, required for any real ingestion
 - Optional: `yt-dlp` (URL import), `faster-whisper` (transcription), OpenCV YuNet/SFace ONNX assets under `models/opencv/` (face re-identification)
@@ -111,8 +113,14 @@ Backend (from `backend/`, venv at `backend/.venv`):
 ```pwsh
 python -m venv .venv ; .venv\Scripts\Activate.ps1   # first time
 pip install -e .[dev]                               # first time
-python -m pytest                                    # 80 tests
+python -m pytest
 ```
+
+The backend install builds the Rust interval matcher offline from its committed
+Cargo lockfile. Evaluation uses this native core for greedy interval matching;
+Python retains normalization, metric rounding and SQLite persistence. See
+[setup](docs/setup.md) for native build and missing-library errors, and
+[architecture](docs/architecture.md#evaluation-interval-matching) for the boundary.
 
 Frontend (from `frontend/`):
 

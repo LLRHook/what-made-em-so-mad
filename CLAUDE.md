@@ -23,7 +23,7 @@ Backend (run from `backend/`; venv at `backend/.venv`):
 ```pwsh
 python -m venv .venv ; .venv\Scripts\Activate.ps1   # first time
 pip install -e .[dev]                               # first time
-python -m pytest                                    # full suite (80 tests)
+python -m pytest                                    # full backend suite
 python -m pytest tests/test_clips_api.py            # one file
 python -m pytest tests/test_clips_api.py::test_name # one test
 python -m pytest --collect-only -q                  # enumerate without running
@@ -49,8 +49,15 @@ The launchers pick free localhost ports and print the URLs; set
 Other entry points: `python scripts/check_system.py` probes optional components;
 `python scripts/run_worker.py [--once]` drains queued analysis jobs.
 
-No linter or formatter is wired on either tier yet (only `tsc`); do not assume a
-`lint` script exists.
+No Python or frontend linter/formatter is wired (the frontend has `tsc`);
+do not assume a `lint` script exists.
+
+Backend source/editable installs also build the Rust interval matcher and require
+Rust 1.85+ and Cargo. After editing `backend/native/intervals`, reinstall the
+backend before Python tests. [backend/README.md](backend/README.md) lists native
+test, Clippy, and formatting commands; [docs/setup.md](docs/setup.md) describes
+wheel compatibility and typed native errors. Evaluation loads the cdylib lazily
+through ctypes; analysis, boot, and optional media/model probes stay in Python.
 
 ## Architecture
 

@@ -1,0 +1,3 @@
+include setup.py
+include native/intervals/Cargo.toml native/intervals/Cargo.lock
+include native/intervals/src/lib.rs

@@ -427,6 +427,20 @@ Priority guide: crit / high / med / low.
 
 ---
 
+### [FEAT-020] Rust interval matcher for offline evaluation
+- [ ] **Priority:** high
+- **Area:** analysis, tests, tooling
+- **File(s):** backend/app/services/evaluation.py, backend/app/services/interval_matching.py, backend/native/, backend/setup.py, backend/tests/
+- **Why:** SPEC E-002 / SRS FR-5.1: preserve the existing evaluation metrics while moving the greedy interval matching processor into an in-process native core.
+- **Approach:** batch C ABI over a dependency-free Rust cdylib; keep Python normalization, stable confidence ordering, metric rounding, API and SQLite persistence. Build the library in normal wheel/editable installs and load it only when matching is needed.
+- **Library / dependency notes:** Rust standard library and Python ctypes; reuse setuptools. No new runtime package dependency.
+- **Acceptance criteria:** exact legacy metric parity including ties, thresholds, empty inputs and non-finite values; actual API/native integration; typed native failure with no partial evaluation row; boot and job claiming remain independent of native availability.
+- **Test plan:** independent legacy Python oracle, deterministic synthetic metadata, native ABI error tests, evaluation API/temp SQLite tests, platform wheel and editable-install smoke checks.
+- **Out of scope:** media acquisition, model inference, analysis-label changes, job lifecycle fixes, real accuracy datasets or performance claims.
+- **Implementation:** Rust IoU/greedy matching now serves the evaluation path through a lazy ctypes batch adapter. Native parity/error, API/temp SQLite and build-adapter tests cover the boundary. Independent review and full wheel/platform acceptance remain pending.
+- **Docs:** README.md, backend/README.md, docs/setup.md, docs/architecture.md, CLAUDE.md, VERIFICATION.md
+- **Status:** in-progress
+
 ## Shipped
 
 _None yet. Tracker starts as of 2026-06-11._

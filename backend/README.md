@@ -9,3 +9,22 @@ pip install -e .[dev]
 pytest -q
 uvicorn app.main:app --reload --port 8000
 ```
+
+Source and editable installs require Rust 1.85+ and Cargo on PATH. The normal
+setuptools build compiles `native/intervals` with `--release --locked --offline`
+and includes the shared library in a platform-tagged wheel. There are no Cargo
+dependencies to download. Installing a built wheel does not require Rust.
+
+After changing Rust source, rerun `pip install -e .` before the Python tests.
+Run the native checks from this directory with:
+
+```sh
+cargo test --manifest-path native/intervals/Cargo.toml --locked --offline
+cargo clippy --manifest-path native/intervals/Cargo.toml --locked --offline --all-targets -- -D warnings
+cargo fmt --manifest-path native/intervals/Cargo.toml -- --check
+python -m pytest tests/test_interval_matching.py tests/test_evaluation_api.py tests/test_analysis_api.py
+```
+
+The tests use synthetic metadata and temporary SQLite databases. The frozen
+Python evaluator under `tests/reference/` is the parity oracle, not a production
+fallback. No media or models are needed for interval matching.
